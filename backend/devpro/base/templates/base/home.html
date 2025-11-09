@@ -48,7 +48,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                {% for day in orders_by_day|slice:":7" %}
+                {% for day in orders_by_day %}
                     <tr>
                         <td>{{ day.date|date:"Y-m-d" }}</td>
                         <td>{{ day.order_count }}</td>
