@@ -1,4 +1,5 @@
 {% extends 'base/base.html' %}
+{% load l10n %}
 {% block title %}Dashboard Brendi{% endblock title %}
 
 {% block body %}
@@ -62,7 +63,7 @@
 
         const revenueData = [
             {% for day in orders_by_day|slice:":7" %}
-                {{ day.total_amount }}{% if not forloop.last %},{% endif %}
+                {{ day.total_amount|unlocalize  }}{% if not forloop.last %},{% endif %}
             {% endfor %}
         ];
 

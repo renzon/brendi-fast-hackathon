@@ -9,10 +9,10 @@ from devpro.base.models import Order
 @login_not_required
 def home(request):
     # Aggregate orders by day
-    orders_by_day = Order.objects.values('date').annotate(
+    orders_by_day = list(Order.objects.values('date').annotate(
         order_count=Count('id'),
         total_amount=Sum('total_amount')
-    ).order_by('-date')
+    ).order_by('-date'))
 
     context = {
         'orders_by_day': orders_by_day
