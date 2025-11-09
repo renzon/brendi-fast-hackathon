@@ -1,0 +1,48 @@
+name: Django Backend CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16.3
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports: [ '5432:5432' ]
+
+    defaults:
+      run:
+        working-directory: backend  # Set the global working directory
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+
+      - name: Setup Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies (using poetry)
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install poetry
+          poetry install --with dev --sync
+
+      - name: Run Linter
+        run: poetry run flake8 .
+
+      - name: Copy instance config variables
+        run: cp ../config/env-sample .env
+
+      - name: Run backend Tests
+        run: poetry run pytest devpro --cov=devpro --cov-fail-under=92 --cache-clear
