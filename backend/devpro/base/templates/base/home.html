@@ -4,7 +4,25 @@
 
 {% block body %}
     <div class="container mt-5">
-        <h1>Dashboard</h1>
+        <h1>Pedidos e Faturamento por Dia</h1>
+
+        <!-- Chat com LLM -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5>💬 Pergunte sobre seus dados</h5>
+            </div>
+            <div class="card-body">
+                <div id="chatMessages" class="mb-3" style="max-height: 300px; overflow-y: auto; border: 1px solid #dee2e6; padding: 15px; border-radius: 5px; background-color: #f8f9fa;">
+                    <p class="text-muted">Faça uma pergunta sobre seus pedidos...</p>
+                </div>
+                <div class="input-group">
+                    <input type="text" id="queryInput" class="form-control" placeholder="Ex: Qual foi o faturamento total nos últimos 7 dias?" />
+                    <button class="btn btn-primary" onclick="sendQuery()" id="sendBtn">
+                        Enviar
+                    </button>
+                </div>
+            </div>
+        </div>
 
         <!-- Gráfico de Pedidos -->
         <div class="card mb-4">
@@ -30,7 +48,7 @@
                 </tr>
                 </thead>
                 <tbody>
-                {% for day in orders_by_day %}
+                {% for day in orders_by_day|slice:":7" %}
                     <tr>
                         <td>{{ day.date|date:"Y-m-d" }}</td>
                         <td>{{ day.order_count }}</td>
@@ -63,7 +81,7 @@
 
         const revenueData = [
             {% for day in orders_by_day|slice:":7" %}
-                {{ day.total_amount|unlocalize  }}{% if not forloop.last %},{% endif %}
+                {{ day.total_amount|unlocalize }}{% if not forloop.last %},{% endif %}
             {% endfor %}
         ];
 
@@ -145,6 +163,66 @@
                         }
                     }
                 }
+            }
+        });
+
+        // Chat functionality
+        function addMessage(message, isUser = false) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `mb-2 ${isUser ? 'text-end' : ''}`;
+            messageDiv.innerHTML = `
+                <span class="badge ${isUser ? 'bg-primary' : 'bg-secondary'} p-2" style="white-space: pre-wrap; text-align: left; display: inline-block; max-width: 80%;">
+                    ${message}
+                </span>
+            `;
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        async function sendQuery() {
+            const input = document.getElementById('queryInput');
+            const query = input.value.trim();
+            const sendBtn = document.getElementById('sendBtn');
+
+            if (!query) return;
+
+            // Adicionar mensagem do usuário
+            addMessage(query, true);
+            input.value = '';
+
+            // Desabilitar botão
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Processando...';
+
+            try {
+                const response = await fetch('/api/query-llm/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ query: query })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    addMessage(data.answer, false);
+                } else {
+                    addMessage('Erro: ' + data.error, false);
+                }
+            } catch (error) {
+                addMessage('Erro ao processar sua pergunta: ' + error.message, false);
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = 'Enviar';
+            }
+        }
+
+        // Permitir enviar com Enter
+        document.getElementById('queryInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendQuery();
             }
         });
     </script>
