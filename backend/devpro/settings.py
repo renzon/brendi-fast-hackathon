@@ -31,6 +31,8 @@ AUTH_USER_MODEL = 'base.User'
 
 ALLOWED_HOSTS = config('BACKEND_ALLOWED_HOSTS', default='', cast=Csv())
 
+OPEN_AI_API_KEY = config('OPEN_AI_API_KEY')
+
 # Application definition
 
 INSTALLED_APPS = [
