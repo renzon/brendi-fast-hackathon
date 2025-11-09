@@ -1,12 +1,10 @@
 from django.db import models
 from django_min_custom_user.models import MinAbstractUser
+from django.contrib.postgres.indexes import GinIndex
 
 
 class User(MinAbstractUser):
     pass
-
-
-from django.contrib.postgres.indexes import GinIndex
 
 
 class Order(models.Model):
