@@ -95,11 +95,11 @@ def get_orders_context():
         total=Sum('total_amount')
     )['total']
 
-    # Pedidos por dia (últimos 7 dias)
+    # Pedidos por dia (últimos 30 dias)
     orders_by_day = list(Order.objects.values('date').annotate(
         order_count=Count('id'),
         total_amount=Sum('total_amount')
-    ).order_by('-date')[:7])
+    ).order_by('-date')[:30])
 
     # Pedidos por status
     orders_by_status = list(Order.objects.values('status').annotate(
@@ -110,7 +110,7 @@ def get_orders_context():
     top_customers = list(Order.objects.values('customer_name').annotate(
         order_count=Count('id'),
         total_spent=Sum('total_amount')
-    ).order_by('-total_spent')[:5])
+    ).order_by('-total_spent')[:10])
 
     # Ticket médio
     avg_ticket = Order.objects.aggregate(
@@ -124,7 +124,7 @@ def get_orders_context():
     Faturamento Total: R$ {total_revenue:.2f}
     Ticket Médio: R$ {avg_ticket:.2f}
 
-    PEDIDOS POR DIA (Últimos 7 dias):
+    PEDIDOS POR DIA (Últimos 30 dias):
     {json.dumps(orders_by_day, indent=2, default=str)}
 
     PEDIDOS POR STATUS:
