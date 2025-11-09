@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('base', '0001_initial'),
     ]
@@ -29,7 +28,10 @@ class Migration(migrations.Migration):
             options={
                 'db_table': 'orders',
                 'ordering': ['-created_at'],
-                'indexes': [django.contrib.postgres.indexes.GinIndex(fields=['raw_data'], name='orders_raw_data_gin_idx'), models.Index(fields=['date', 'status'], name='orders_date_status_idx'), models.Index(fields=['customer_id', 'date'], name='orders_customer_date_idx')],
+                'indexes': [
+                    django.contrib.postgres.indexes.GinIndex(fields=['raw_data'], name='orders_raw_data_gin_idx'),
+                    models.Index(fields=['date', 'status'], name='orders_date_status_idx'),
+                    models.Index(fields=['customer_id', 'date'], name='orders_customer_date_idx')],
             },
         ),
     ]
